@@ -1,0 +1,36 @@
+services:
+  chorebase:
+    image: ghcr.io/privatebutts/chorebase:main
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - main
+    ports:
+      - 8080:8080
+    volumes:
+      - pb_data:/pb/pb_data
+      - pb_public:/pb/pb_public
+    environment:
+      - "APP_URL=http://localhost:8080"
+      - "ADMIN_EMAIL=admin@example.com"
+      - "ADMIN_PASSWORD='password'"
+      - "VUE_APP_API_URL=http://localhost:8080"
+    restart: "unless-stopped"
+
+  choreface:
+    image: ghcr.io/privatebutts/choreface:main
+    build:
+      context: ./spa
+      dockerfile: Dockerfile
+      tags:
+        - main
+    environment:
+      - VITE_APP_API_URL=http://localhost:8080
+    volumes:
+      - pb_public:/app/dist
+    restart: "no"
+
+volumes:
+  pb_public:
+  pb_data:

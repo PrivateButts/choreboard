@@ -1,5 +1,7 @@
 FROM alpine:latest
 
+LABEL org.opencontainers.image.source=https://github.com/PrivateButts/choreboard
+
 ARG PB_VERSION=0.33.0
 
 RUN apk add --no-cache \
