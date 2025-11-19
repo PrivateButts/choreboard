@@ -3,6 +3,7 @@
     <ScoreboardPage />
     <ChoreboardPage />
     <BountiesPage />
+    <AddFAB />
   </div>
 </template>
 

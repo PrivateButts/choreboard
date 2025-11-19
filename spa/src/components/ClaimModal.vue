@@ -1,8 +1,8 @@
 <template>
   <div>
-    <button class="btn" onclick="claimModal.showModal()">open modal</button>
+    <button class="btn" @click="modal.showModal()">Claim Bounty</button>
     <Teleport to="body">
-      <dialog id="claimModal" class="modal">
+      <dialog ref="modal" class="modal">
         <div class="modal-box">
           <form @submit.prevent>
             <legend>Claim Bounty</legend>
@@ -23,6 +23,7 @@
 <script setup>
 import 'vue-select/dist/vue-select.css';
 import pb from '@/lib/pb'
+import { sharedCache } from '@/lib/pb';
 import { ref, onMounted } from 'vue';
 
 const props = defineProps({
@@ -36,9 +37,7 @@ const users = ref([]);
 const claimers = ref([]);
 
 onMounted(async () => {
-  users.value = (await pb.collection('users').getFullList({
-    sort: 'name',
-  })).map(user => {
+  users.value = sharedCache.get('users').map(user => {
     return { id: user.id, name: user.name };
   });
   claimers.value = [{ id: pb.authStore.record.id, name: pb.authStore.record.name }]

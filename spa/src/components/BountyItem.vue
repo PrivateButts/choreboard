@@ -4,12 +4,14 @@
       {{ bounty.name }}
       <span class="badge badge-xl badge-primary">{{ bounty.value }}</span>
     </h2>
-    <p class="text-gray-500">Claimed By: {{ bounty.claimers_label }}</p>
+    <p class="text-gray-500" v-if="bounty.date_claimed">Claimed By: {{ bounty.claimers_label }}</p>
+    <ClaimModal :bounty-id="bounty.id" v-else />
   </div>
 </template>
 
 <script setup>
 import { defineProps } from 'vue';
+import ClaimModal from './ClaimModal.vue';
 
 const props = defineProps({
   bounty: {
