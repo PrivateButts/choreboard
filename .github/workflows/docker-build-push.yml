@@ -23,6 +23,7 @@ jobs:
               uses: docker/setup-buildx-action@v2
               with:
                   install: true
+                  driver: docker-container
 
     build-and-push:
         needs: setup-buildx
