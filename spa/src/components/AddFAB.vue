@@ -97,7 +97,7 @@
     </div>
     <div>
       Add Chore
-      <button class="btn btn-lg btn-circle">
+      <AddChoreModal :btnClasses="'btn btn-lg btn-circle'">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" id="Interface-Essential-Home-2--Streamline-Pixel"
           height="32" width="32">
           <desc>
@@ -130,7 +130,7 @@
             <path d="M5.335 16.76h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path>
           </g>
         </svg>
-      </button>
+      </AddChoreModal>
     </div>
   </div>
 </template>

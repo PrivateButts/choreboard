@@ -32,6 +32,10 @@ import pb from '@/lib/pb'
 const chores = ref([]);
 
 onMounted(async () => {
+  updateChores();
+});
+
+async function updateChores() {
   chores.value = await pb.collection('chores').getFullList({
     filter: '',
     expand: ['chore_claims_via_chore.user']
@@ -44,33 +48,38 @@ onMounted(async () => {
       claims: claims
     };
   });
+}
 
-  pb.collection('chore_claims').subscribe('*', async function (e) {
-    if (e.action === 'delete') {
-      console.debug('Chore claim deleted', e.record.id);
-      chores.value = chores.value.map(chore => {
+pb.collection('chores').subscribe('*', function (e) {
+  console.debug('Chore event:', e);
+  updateChores();
+}, { /* other options like expand, custom headers, etc. */ });
+
+pb.collection('chore_claims').subscribe('*', async function (e) {
+  if (e.action === 'delete') {
+    console.debug('Chore claim deleted', e.record.id);
+    chores.value = chores.value.map(chore => {
+      return {
+        ...chore,
+        claims: chore.claims.filter(claim => claim.id !== e.record.id)
+      };
+    });
+  }
+  else if (e.action === 'create') {
+    console.debug('Chore claim created', e.record.id);
+    const record = e.record;
+    record.expand = { user: await pb.collection('users').getOne(record.user, { requestKey: null }) };
+    chores.value = chores.value.map(chore => {
+      if (chore.id === e.record.chore) {
         return {
           ...chore,
-          claims: chore.claims.filter(claim => claim.id !== e.record.id)
+          claims: [...chore.claims, record]
         };
-      });
-    }
-    else if (e.action === 'create') {
-      console.debug('Chore claim created', e.record.id);
-      const record = e.record;
-      record.expand = { user: await pb.collection('users').getOne(record.user) };
-      chores.value = chores.value.map(chore => {
-        if (chore.id === e.record.chore) {
-          return {
-            ...chore,
-            claims: [...chore.claims, record]
-          };
-        }
-        return chore;
-      });
-    }
-  }, { /* other options like expand, custom headers, etc. */ });
-});
+      }
+      return chore;
+    });
+  }
+}, { /* other options like expand, custom headers, etc. */ });
 
 function getDateForDay(day) {
   const today = new Date();

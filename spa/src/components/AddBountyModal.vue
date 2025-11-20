@@ -1,10 +1,10 @@
 <template>
   <div>
-    <button :class="btnClasses" onclick="bountyModal.showModal()">
+    <button :class="btnClasses" @click="bountyModal.showModal()">
       <slot></slot>
     </button>
     <Teleport to="body">
-      <dialog id="bountyModal" class="modal">
+      <dialog ref="bountyModal" class="modal">
         <div class="modal-box">
           <form @submit.prevent>
             <legend>Create Bounty</legend>
@@ -41,7 +41,7 @@
 
 <script setup>
 import pb from '@/lib/pb'
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, useTemplateRef } from 'vue';
 
 const props = defineProps({
   btnClasses: {
@@ -53,6 +53,7 @@ const props = defineProps({
 const bountyName = ref('');
 const bountyValue = ref(1);
 const description = ref('');
+const bountyModal = useTemplateRef('bountyModal');
 
 onMounted(async () => {
 });
@@ -70,7 +71,6 @@ async function submitBounty() {
       description: description.value
     });
     console.log('Bounty issued:', createdBounty);
-    const bountyModal = document.getElementById('bountyModal');
     bountyModal.close();
   } catch (error) {
     console.error('Error issuing bounty:', error);

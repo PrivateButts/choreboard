@@ -24,7 +24,7 @@
 import 'vue-select/dist/vue-select.css';
 import pb from '@/lib/pb'
 import { sharedCache } from '@/lib/pb';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, useTemplateRef } from 'vue';
 
 const props = defineProps({
   bountyId: {
@@ -35,6 +35,7 @@ const props = defineProps({
 
 const users = ref([]);
 const claimers = ref([]);
+const modal = useTemplateRef('modal');
 
 onMounted(async () => {
   users.value = sharedCache.get('users').map(user => {
