@@ -53,7 +53,7 @@ jobs:
             - name: Compute root image tags
               id: tags-root
               run: |
-                  IMAGE="$REGISTRY/$REPO_OWNER/choreboard-root"
+                  IMAGE="$REGISTRY/$REPO_OWNER/chorebase"
                   if [ "$GITHUB_REF" = "refs/heads/main" ]; then
                     echo "TAGS=${IMAGE}:${GITHUB_SHA},${IMAGE}:latest" >> $GITHUB_OUTPUT
                   else
@@ -72,7 +72,7 @@ jobs:
             - name: Compute spa image tags
               id: tags-spa
               run: |
-                  IMAGE="$REGISTRY/$REPO_OWNER/choreboard-spa"
+                  IMAGE="$REGISTRY/$REPO_OWNER/choreface"
                   if [ "$GITHUB_REF" = "refs/heads/main" ]; then
                     echo "TAGS=${IMAGE}:${GITHUB_SHA},${IMAGE}:latest" >> $GITHUB_OUTPUT
                   else
