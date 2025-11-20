@@ -49,10 +49,19 @@ jobs:
               run: |
                   OWNER="$(echo "${GITHUB_REPOSITORY%%/*}" | tr '[:upper:]' '[:lower:]')"
                   IMAGE="$REGISTRY/$OWNER/chorebase"
+                  # derive human-friendly branch name or PR id
+                  case "$GITHUB_REF" in
+                    refs/heads/*) BRANCH="${GITHUB_REF#refs/heads/}" ;;
+                    refs/tags/*) BRANCH="${GITHUB_REF#refs/tags/}" ;;
+                    refs/pull/*) PR_NUM=$(echo "$GITHUB_REF" | cut -d/ -f3); BRANCH="pr-$PR_NUM" ;;
+                    *) BRANCH="$(basename "$GITHUB_REF")" ;;
+                  esac
+                  # sanitize: lowercase and replace invalid chars with '-'
+                  BRANCH_SAFE=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/-/g')
                   if [ "$GITHUB_REF" = "refs/heads/main" ]; then
-                    echo "TAGS=${IMAGE}:${GITHUB_SHA},${IMAGE}:latest" >> $GITHUB_OUTPUT
+                    echo "TAGS=${IMAGE}:${BRANCH_SAFE},${IMAGE}:latest" >> $GITHUB_OUTPUT
                   else
-                    echo "TAGS=${IMAGE}:${GITHUB_SHA}" >> $GITHUB_OUTPUT
+                    echo "TAGS=${IMAGE}:${BRANCH_SAFE}" >> $GITHUB_OUTPUT
                   fi
 
             - name: Build and push root image
@@ -69,10 +78,19 @@ jobs:
               run: |
                   OWNER="$(echo "${GITHUB_REPOSITORY%%/*}" | tr '[:upper:]' '[:lower:]')"
                   IMAGE="$REGISTRY/$OWNER/choreface"
+                  # derive human-friendly branch name or PR id
+                  case "$GITHUB_REF" in
+                    refs/heads/*) BRANCH="${GITHUB_REF#refs/heads/}" ;;
+                    refs/tags/*) BRANCH="${GITHUB_REF#refs/tags/}" ;;
+                    refs/pull/*) PR_NUM=$(echo "$GITHUB_REF" | cut -d/ -f3); BRANCH="pr-$PR_NUM" ;;
+                    *) BRANCH="$(basename "$GITHUB_REF")" ;;
+                  esac
+                  # sanitize: lowercase and replace invalid chars with '-'
+                  BRANCH_SAFE=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/-/g')
                   if [ "$GITHUB_REF" = "refs/heads/main" ]; then
-                    echo "TAGS=${IMAGE}:${GITHUB_SHA},${IMAGE}:latest" >> $GITHUB_OUTPUT
+                    echo "TAGS=${IMAGE}:${BRANCH_SAFE},${IMAGE}:latest" >> $GITHUB_OUTPUT
                   else
-                    echo "TAGS=${IMAGE}:${GITHUB_SHA}" >> $GITHUB_OUTPUT
+                    echo "TAGS=${IMAGE}:${BRANCH_SAFE}" >> $GITHUB_OUTPUT
                   fi
 
             - name: Build and push spa image
