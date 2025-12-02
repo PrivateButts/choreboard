@@ -8,43 +8,37 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import pb from '@/lib/pb'
 
+// Use the scores_lifetime view which aggregates scores server-side and is safe to read as a preview
 const users = ref([]);
-
-onMounted(async () => {
-  fetchScores();
-  pb.collection('chore_claims').subscribe('*', async function (e) {
-    console.debug('Chore claim changed', e.action, e.record.id);
-    await fetchScores();
-  });
-  pb.collection('bounties').subscribe('*', async function (e) {
-    console.debug('Bounty changed', e.action, e.record.id);
-    await fetchScores();
-  });
-});
+let unsub = null;
 
 async function fetchScores() {
-  const userList = await pb.collection('users').getFullList();
-  users.value = await Promise.all(userList.map(async (user) => {
-    user.score = 0;
-    const claims = await pb.collection('chore_claims').getFullList({
-      filter: `user = "${user.id}"`,
-      expand: "chore"
+  try {
+    const list = await pb.collection('scores_lifetime').getFullList({
+      sort: '-score'
     });
-    const bounties = await pb.collection('bounties').getFullList({
-      filter: `claimers ~ "${user.id}"`
-    });
-
-    if (bounties.length > 0) {
-      user.score += bounties.reduce((acc, bounty) => acc + bounty.value, 0);
-    }
-    if (claims.length > 0) {
-      user.score += claims.reduce((acc, claim) => acc + claim.expand.chore.value, 0);
-    }
-    console.debug("User", user.email, "has score", user.score);
-    return user;
-  }));
+    users.value = list.map(u => ({ id: u.id, name: u.name, score: u.score }));
+  } catch (err) {
+    console.debug('Failed to fetch scores_lifetime', err);
+    users.value = [];
+  }
 }
+
+onMounted(async () => {
+  await fetchScores();
+  try {
+    unsub = pb.collection('scores_lifetime').subscribe('*', async (e) => {
+      await fetchScores();
+    });
+  } catch (e) {
+    console.debug('Realtime subscribe failed for scores_lifetime', e);
+  }
+});
+
+onUnmounted(() => {
+  if (typeof unsub === 'function') unsub();
+});
 </script>

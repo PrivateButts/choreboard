@@ -17,16 +17,21 @@
             </div>
           </div>
           <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-            <li><button @click="auth.logout" class="btn btn-link">Logout</button></li>
+            <li><button @click="handleLogout" class="btn btn-link">Logout</button></li>
           </ul>
         </div>
       </div>
       <!-- Login Button -->
-      <div class="" v-else>
-        <RouterLink to="/login" tabindex="0" role="button" class="btn btn-ghost">
-          Login
-        </RouterLink>
-      </div>
+        <div class="" v-else>
+          <RouterLink
+            :to="(route.path === '/login') ? { path: '/login' } : { path: '/login', query: { redirect: route.fullPath } }"
+            tabindex="0"
+            role="button"
+            class="btn btn-ghost"
+          >
+            Login
+          </RouterLink>
+        </div>
     </div>
   </div>
 </template>
@@ -34,5 +39,15 @@
 <script setup>
 import { useAuthStore } from '../stores/auth'
 import pb from '@/lib/pb';
+import ScoreBadge from './ScoreBadge.vue'
+import { useRoute, useRouter } from 'vue-router';
 const auth = useAuthStore()
+const route = useRoute();
+const router = useRouter();
+
+function handleLogout() {
+  auth.logout();
+  // after logout, navigate to home (or current route root)
+  router.push('/');
+}
 </script>

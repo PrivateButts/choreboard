@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button :class="btnClasses" @click="bountyModal.showModal()">
+    <button :class="btnClasses" @click="openBountyModal()">
       <slot></slot>
     </button>
     <Teleport to="body">
@@ -42,6 +42,8 @@
 <script setup>
 import pb from '@/lib/pb'
 import { ref, onMounted, useTemplateRef } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps({
   btnClasses: {
@@ -53,10 +55,21 @@ const props = defineProps({
 const bountyName = ref('');
 const bountyValue = ref(1);
 const description = ref('');
+
 const bountyModal = useTemplateRef('bountyModal');
 
-onMounted(async () => {
-});
+function openBountyModal() {
+  const router = useRouter();
+  const route = useRoute();
+  const auth = useAuthStore();
+
+  if (!auth.is_logged_in) {
+    router.push({ path: '/login', query: { redirect: route.fullPath } });
+    return;
+  }
+
+  bountyModal.showModal();
+}
 
 async function submitBounty() {
   if (!bountyName.value || bountyValue.value < 1) {

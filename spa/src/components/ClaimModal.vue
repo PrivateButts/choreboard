@@ -25,6 +25,8 @@ import 'vue-select/dist/vue-select.css';
 import pb from '@/lib/pb'
 import { sharedCache } from '@/lib/pb';
 import { ref, onMounted, useTemplateRef } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const props = defineProps({
   bountyId: {
@@ -38,6 +40,15 @@ const claimers = ref([]);
 const modal = useTemplateRef('modal');
 
 onMounted(async () => {
+  const router = useRouter();
+  const route = useRoute();
+  const auth = useAuthStore();
+
+  if (!auth.is_logged_in) {
+    router.push({ path: '/login', query: { redirect: route.fullPath } });
+    return;
+  }
+
   users.value = sharedCache.get('users').map(user => {
     return { id: user.id, name: user.name };
   });

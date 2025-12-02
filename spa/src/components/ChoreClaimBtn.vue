@@ -13,6 +13,8 @@
 
 <script setup>
 import { defineProps } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import pb from '@/lib/pb';
 
 const props = defineProps({
@@ -22,6 +24,16 @@ const props = defineProps({
 });
 
 function toggleClaim() {
+  const router = useRouter();
+  const route = useRoute();
+  const auth = useAuthStore();
+
+  if (!auth.is_logged_in) {
+    // redirect to login with return path
+    router.push({ path: '/login', query: { redirect: route.fullPath } });
+    return;
+  }
+
   const existingClaim = props.claims.find(claim => claim.expand.user.id === pb.authStore.record.id);
   if (existingClaim) {
     // Remove claim

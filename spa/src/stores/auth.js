@@ -4,12 +4,18 @@ import pb from '@/lib/pb'
 
 
 export const useAuthStore = defineStore('auth', () => {
-  try {
-    pb.collection("users").authRefresh()
-  }
-  catch (e) {
-    console.debug("No valid auth to refresh", e)
-  }
+  // Try to refresh an existing auth session. authRefresh() returns a Promise,
+  // so handle rejections to avoid an uncaught promise error (401 when no valid token).
+  pb.collection("users").authRefresh()
+    .then((res) => {
+      // authRefresh will update pb.authStore internally; onChange handler below will pick it up
+      console.debug('auth refresh succeeded', res)
+    })
+    .catch((e) => {
+      // common case: no valid token / unauthorized — handle quietly
+      console.debug("No valid auth to refresh", e)
+      try { pb.authStore.clear() } catch (_) {}
+    })
 
 
   const is_logged_in = ref(pb.authStore.isValid && pb.authStore.user);
@@ -18,12 +24,18 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(email, password) {
     console.debug("login called", pb.authStore.isValid)
-    const authdata = await pb.collection("users").authWithPassword(email, password);
-    if (authdata) {
-      user.value = authdata.record;
-      is_logged_in.value = true
+    try {
+      const authdata = await pb.collection("users").authWithPassword(email, password);
+      if (authdata) {
+        user.value = authdata.record;
+        is_logged_in.value = true
+      }
+      console.debug("login called end", pb.authStore.isValid)
+      return authdata
+    } catch (err) {
+      console.debug('login failed', err)
+      throw err
     }
-    console.debug("login called end", pb.authStore.isValid)
   }
 
   function logout() {
