@@ -22,16 +22,13 @@
         </div>
       </div>
       <!-- Login Button -->
-        <div class="" v-else>
-          <RouterLink
-            :to="(route.path === '/login') ? { path: '/login' } : { path: '/login', query: { redirect: route.fullPath } }"
-            tabindex="0"
-            role="button"
-            class="btn btn-ghost"
-          >
-            Login
-          </RouterLink>
-        </div>
+      <div class="" v-else>
+        <RouterLink
+          :to="(route.path === '/login') ? { path: '/login' } : { path: '/login', query: { redirect: route.fullPath } }"
+          tabindex="0" role="button" class="btn btn-ghost">
+          Login
+        </RouterLink>
+      </div>
     </div>
   </div>
 </template>

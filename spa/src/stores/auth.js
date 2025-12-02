@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
     .catch((e) => {
       // common case: no valid token / unauthorized — handle quietly
       console.debug("No valid auth to refresh", e)
-      try { pb.authStore.clear() } catch (_) {}
+      try { pb.authStore.clear() } catch (_) { }
     })
 
 
