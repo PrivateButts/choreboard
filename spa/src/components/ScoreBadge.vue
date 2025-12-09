@@ -26,6 +26,7 @@
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import pb from '@/lib/pb'
 import { useAuthStore } from '@/stores/auth'
+import { getDateForDay } from '@/utils/date'
 
 const props = defineProps({
   user: { type: Object, default: null }
@@ -54,6 +55,8 @@ async function fetchScores() {
     return
   }
 
+  const weekStart = getDateForDay(0) // Sunday
+
   loading.value = true
   try {
     // fetch latest weekly score for this user (sorted by week_start desc)
@@ -62,7 +65,7 @@ async function fetchScores() {
       sort: '-week_start',
       requestKey: null
     })
-    if (weeklyResp?.items?.length) {
+    if (weeklyResp?.items?.length && weeklyResp.items[0].week_start === weekStart) {
       weekly.value = weeklyResp.items[0]
     } else {
       weekly.value = { weekly_score: 0, week_start: null }

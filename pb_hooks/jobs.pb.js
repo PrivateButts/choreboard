@@ -1,4 +1,5 @@
 cronAdd("weekly_wrap_up", "0 0 * * 0", async () => {
+  console.debug("weekly_wrap_up cron job started");
   const ntfy = require(`${__hooks}/ntfy.js`)
   try {
     // This hook runs every week on Sunday at midnight
@@ -17,7 +18,13 @@ cronAdd("weekly_wrap_up", "0 0 * * 0", async () => {
 
     if (weekScoreList.length === 0) {
       $app.logger().warn("No scores found for the week.");
-      ntfy.sendNtfyNotification("No scores found", "No scores found for the week.");
+      ntfy.sendNtfyNotification("No scores found", "No scores found for the week.", ["skull"], [
+        new ntfy.NTFYAction(
+          ntfy.ActionTypes.VIEW,
+          "View Choreboard",
+          process.env.APP_URL
+        )
+      ]);
       return;
     }
 
@@ -27,7 +34,13 @@ cronAdd("weekly_wrap_up", "0 0 * * 0", async () => {
     // Send notification to the ntfy group
     if (topUser) {
       const message = `Weekly wrap-up: ${topUser.getString("email")} won with ${weekScore.get("weekly_score")} points!`;
-      ntfy.sendNtfyNotification("Weekly Wrap-Up", message);
+      ntfy.sendNtfyNotification("Weekly Wrap-Up", message, ["trophy"], [
+        ntfy.NTFYAction(
+          ntfy.ActionTypes.VIEW,
+          "View Choreboard",
+          process.env.PUBLIC_URL
+        )
+      ]);
     }
 
   } catch (error) {
@@ -37,6 +50,6 @@ cronAdd("weekly_wrap_up", "0 0 * * 0", async () => {
       "message", error.message,
       "stack", error.stack
     );
-    ntfy.sendNtfyNotification("Error in weekly_wrap_up", error.message);
+    ntfy.sendNtfyNotification("Error in weekly_wrap_up", error.message, ["rotating_light"]);
   }
 });
