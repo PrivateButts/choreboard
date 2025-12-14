@@ -3,8 +3,8 @@
     <button class="btn btn-soft btn-xl w-full" @click="toggleClaim()">
       <div class="avatar p-2 h-full" v-for="claim in claims" :key="claim.id">
         <div class="w-10 rounded-full">
-          <img alt="Tailwind CSS Navbar component"
-            :src="`http://localhost:8080/api/files/_pb_users_auth_/${claim.expand.user.id}/${claim.expand.user.avatar}`" />
+          <img alt="Claim Button Image"
+            :src="`${pb.baseURL}/api/files/_pb_users_auth_/${claim.expand.user.id}/${claim.expand.user.avatar}`" />
         </div>
       </div>
     </button>

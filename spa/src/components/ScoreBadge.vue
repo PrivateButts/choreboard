@@ -2,7 +2,8 @@
   <div class="score-badge" role="status" :aria-busy="loading">
     <div class="score-left">
       <div class="score-icon">
-        <img v-if="props.user && props.user.avatar" :src="avatarUrl" alt="avatar" class="score-avatar" />
+        <img v-if="props.user && props.user.avatar" :src="avatarUrl" alt="avatar" class="score-avatar"
+          :title="props.user.name" />
         <span v-else></span>
       </div>
       <div class="score-values">
