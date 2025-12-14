@@ -30,11 +30,15 @@ async function fetchScores() {
 onMounted(async () => {
   await fetchScores();
   try {
-    unsub = pb.collection('scores_lifetime').subscribe('*', async (e) => {
-      await fetchScores();
-    });
+    // scores_lifetime is a view; subscribe to source tables that affect the view
+    const unsubClaims = pb.collection('chore_claims').subscribe('*', async (e) => await fetchScores());
+    const unsubBounties = pb.collection('bounties').subscribe('*', async (e) => await fetchScores());
+    unsub = () => {
+      try { if (typeof unsubClaims === 'function') unsubClaims() } catch (_) { }
+      try { if (typeof unsubBounties === 'function') unsubBounties() } catch (_) { }
+    }
   } catch (e) {
-    console.debug('Realtime subscribe failed for scores_lifetime', e);
+    console.debug('Realtime subscribe failed for source tables', e);
   }
 });
 

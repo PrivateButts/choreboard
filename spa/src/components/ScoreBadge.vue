@@ -93,15 +93,29 @@ onMounted(async () => {
   await fetchScores()
 
   try {
-    unsubWeekly = pb.collection('scores_weekly').subscribe('*', async (e) => {
+    // `scores_weekly` and `scores_lifetime` are DB views and do not emit realtime events.
+    // Subscribe to the underlying source tables instead and refresh when relevant changes occur.
+    unsubWeekly = pb.collection('chore_claims').subscribe('*', async (e) => {
       const rec = e?.record
       if (!rec) return
-      if (rec.user_id === uid.value) await fetchScores()
+      const uidVal = uid.value
+      if (!uidVal) return
+      // chore_claims have a `user` field (id) or a nested user object
+      const recUserId = rec.user || rec.user?.id
+      if (recUserId === uidVal) await fetchScores()
     })
-    unsubLifetime = pb.collection('scores_lifetime').subscribe('*', async (e) => {
+
+    unsubLifetime = pb.collection('bounties').subscribe('*', async (e) => {
       const rec = e?.record
       if (!rec) return
-      if (rec.user_id === uid.value) await fetchScores()
+      const uidVal = uid.value
+      if (!uidVal) return
+      // bounties may store claimers as an array of ids or as a JSON string
+      const claimers = rec.claimers
+      let includes = false
+      if (Array.isArray(claimers)) includes = claimers.includes(uidVal)
+      else if (typeof claimers === 'string' && claimers.includes(uidVal)) includes = true
+      if (includes) await fetchScores()
     })
   } catch (e) {
     console.debug('Realtime subscribe failed', e)

@@ -67,11 +67,9 @@ let unsub = null;
 
 async function fetchScoresPreview() {
   try {
-    const list = await pb.collection('scores_lifetime').getList(1, 10, { sort: '-score', expand: 'user_id' });
-    console.debug('Fetched scores for login preview', list);
-    users.value = list.items.map(u => {
-      return u.expand.user_id;
-    });
+    // read from the view which aggregates server-side
+    const list = await pb.collection('scores_lifetime').getFullList({ sort: '-score' });
+    users.value = list.map(u => ({ id: u.id, name: u.name, avatar: u.avatar, score: u.score }));
   } catch (err) {
     console.debug('Failed to fetch scores_lifetime for login preview', err);
     users.value = [];
@@ -81,9 +79,14 @@ async function fetchScoresPreview() {
 onMounted(async () => {
   await fetchScoresPreview();
   try {
-    unsub = pb.collection('scores_lifetime').subscribe('*', async () => await fetchScoresPreview());
+    const unsubClaims = pb.collection('chore_claims').subscribe('*', async () => await fetchScoresPreview());
+    const unsubBounties = pb.collection('bounties').subscribe('*', async () => await fetchScoresPreview());
+    unsub = () => {
+      try { if (typeof unsubClaims === 'function') unsubClaims() } catch (_) { }
+      try { if (typeof unsubBounties === 'function') unsubBounties() } catch (_) { }
+    }
   } catch (e) {
-    console.debug('Realtime subscribe failed for login preview', e);
+    console.debug('Realtime subscribe failed for login preview source tables', e);
   }
 });
 
